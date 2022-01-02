@@ -6,70 +6,81 @@
         xmlns:local="clr-namespace:app"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
-        Title="CBZ Creator" 
-        MinHeight="320" MinWidth="300" 
+        Title="CBZ e-reader files creator"
+        MinHeight="320" MinWidth="300"
         Height="320" Width="300"
-        WindowStyle="ToolWindow" 
+        WindowStyle="ToolWindow"
         Background="#FFFAFAFA">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="b2v" />
     </Window.Resources>
 
-    <Grid>
-        <!--TITLE-->
-        <Label Content="CBZ Creator" 
-               FontSize="22" 
-               FontWeight="DemiBold" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Top"/>
-
+    <StackPanel Margin="10">
         <!--CONFIGURATION-->
         <StackPanel x:Name="gridConfiguration"
-              Margin="10" 
-              Visibility="Visible">        
+                    Visibility="Visible">
+
             <!--INPUT PATH-->
-            <Grid Margin="0,50,0,0">
+            <Grid>
                 <TextBox Style="{StaticResource placeHolder}"
                          x:Name="inputTextBox"
                          Tag="Input directory"
-                         Margin="0,0,30,0" 
-                         TextWrapping="Wrap" VerticalAlignment="Top" 
-                         HorizontalContentAlignment="Stretch" 
-                         Height="20"/>
-                <Button Content="  ...  " 
+                         Margin="0 0 30 0"
+                         TextWrapping="WrapWithOverflow"
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Stretch"
+                         Height="20" />
+
+                <Button Content="..."
+                        Padding="8 0"
                         Click="InputClick"
-                        HorizontalAlignment="Right" 
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Top"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
                         Height="20"/>
             </Grid>
 
             <!--OUTPUT PATH-->
-            <TextBox Style="{StaticResource placeHolder}" 
+            <TextBox Style="{StaticResource placeHolder}"
                      x:Name="mangaNameTextBox"
-                     Tag="Manga name (prefix output file)"
-                     Margin="0,5,0,0" 
-                     TextWrapping="Wrap" VerticalAlignment="Top" 
-                     HorizontalContentAlignment="Stretch" 
+                     Tag="Manga name (custom prefix)"
+                     Margin="0 5 0 0"
+                     TextWrapping="Wrap" VerticalAlignment="Top"
+                     HorizontalContentAlignment="Stretch"
                      Height="20"/>
 
+            <!--Suffixe file--><!--
+            <StackPanel Orientation="Horizontal" Margin="0 5" Height="20">
+                <TextBlock Text="Suffixe file" Margin="0 0 8 1" VerticalAlignment="Center" FontWeight="DemiBold" />
+                <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="None" IsChecked="True"></RadioButton>
+                <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="Vol." x:Name="IsVolume"></RadioButton>
+                <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="Ch." x:Name="IsChapter"></RadioButton>
+            </StackPanel>-->
+
             <!--PAGE TYPE-->
-            <StackPanel Orientation="Horizontal" Margin="0,5" Height="20">
-                <TextBlock Text="Page" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <RadioButton Margin="0,5,5,0" Content="Simple" IsChecked="True"></RadioButton>
-                <RadioButton Margin="0,5,5,0" Content="Double" x:Name="IsDoublePage"></RadioButton>
+            <StackPanel Orientation="Horizontal" Height="20">
+                <TextBlock Margin="0 0 8 1" Text="Page" VerticalAlignment="Center" FontWeight="DemiBold" />
+                <RadioButton Margin="0 5 5 0" Content="Simple" IsChecked="True"></RadioButton>
+                <RadioButton Margin="0 5 5 0" Content="Double" x:Name="IsDoublePage"></RadioButton>
             </StackPanel>
 
             <!--PAGE ORIENTATION-->
-            <StackPanel Orientation="Horizontal" Height="48"
+            <StackPanel Orientation="Horizontal"
                         Visibility="{Binding IsChecked,ElementName=IsDoublePage,Converter={StaticResource b2v}}">
-                <TextBlock Text="Orientation" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <RadioButton Margin="0,5,5,0" x:Name="RightToLeft"
+
+                <TextBlock Text="Orientation"
+                           Margin="0 0 8 0"
+                           VerticalAlignment="Center" />
+
+                <RadioButton Margin="0 5 5 0" x:Name="RightToLeft"
                              IsChecked="True" VerticalContentAlignment="Center">
                     <RadioButton.Content>
                         <Image Source="/Assets/2_1.png" />
                     </RadioButton.Content>
                 </RadioButton>
-                <RadioButton Margin="0,5,5,0" x:Name="LeftToRight"
+
+                <RadioButton Margin="0 5 5 0" x:Name="LeftToRight"
                              VerticalContentAlignment="Center">
                     <RadioButton.Content>
                         <Image Source="/Assets/1_2.png" />
@@ -77,30 +88,39 @@
                 </RadioButton>
             </StackPanel>
 
-            <CheckBox x:Name="IsCompressed" IsChecked="True" Content="Compress files ?" />
+            <CheckBox x:Name="IsCompressed"
+                      Margin="0 5 0 0"
+                      Content="Compress files ?"
+                      IsChecked="True" />
 
             <!--SUBMIT-->
-            <Button Content="Create" 
-                    Click="SubmitClick"
-                    HorizontalAlignment="Stretch" 
-                    Height="30" Margin="0,5"
-                    VerticalAlignment="Bottom"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
+                <Button Content="Rename" 
+                        Click="RenameClick"
+                        Height="30" Margin="0,5"
+                        Grid.Column="0"/>
+                
+                <Button Content="Create" 
+                        Click="SubmitClick"
+                        Height="30" Margin="0,5"
+                        Grid.Column="2" />
+            </Grid>
         </StackPanel>
 
-        <!--WORKING-->
-        <StackPanel x:Name="stackPanelSpinner"
-                    Margin="10,50,10,10"
-                    Visibility="Hidden">
-            <!--INFORMATION-->
-            <Label x:Name="labelInformation"
-                   Content="" />
-            <!--SPINNER-->
-            <Image Margin="0,20,0,0" 
-                   gif:ImageBehavior.AnimatedSource="Assets\spinner.gif"
+        <!--SPINNER-->
+        <StackPanel x:Name="stackPanelSpinner" Visibility="Hidden">
+            <Image Margin="0 10 0 0" 
+                   gif:ImageBehavior.AnimatedSource="Assets\tweaking-robot.gif"
                    HorizontalAlignment="Center" 
                    Height="250" 
                    Width="250"
                    VerticalAlignment="Center"/>
         </StackPanel>
-    </Grid>
+    </StackPanel>
 </Window>
