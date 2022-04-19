@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -36,16 +35,14 @@ namespace app.Services
                 .ToList()
                 .ForEach(directory =>
                 {
-                    BrowseDirectory(directory);
+                    BrowseDirectory(directory, $"{InputFolder}\\{directory.GetHashCode()}");
                 });
         }
 
         public void RenameFolder()
         {
-            InputFolder = "H:\\Desktop\\Nouveau dossier";
-
             Dictionary<string, double> directories = Directory.EnumerateDirectories(InputFolder)
-                .ToDictionary(x => x, x => double.Parse(x.Substring(InputFolder.Length).Replace("\\", string.Empty).Trim().Split(' ')[0], CultureInfo.InvariantCulture));
+                .ToDictionary(x => x, x => double.Parse(x.Split(Path.DirectorySeparatorChar).Last().Split(' ').Last(), CultureInfo.InvariantCulture));
 
             int highDirectory = (int)directories.OrderBy(x => x.Value).LastOrDefault().Value;
             int totalWidth = highDirectory.ToString().Length + 2;
@@ -65,61 +62,70 @@ namespace app.Services
 
         #region Private
 
-        private static IEnumerable<string> ImageExtensions = new List<string> { "jpg", "jpeg", "jpe", "bmp", "gif", "png" };
-
-        private string TempFolderPath => $"{InputFolder}\\temp";
+        private static readonly IEnumerable<string> ImageExtensions = new List<string> { "jpg", "jpeg", "jpe", "bmp", "gif", "png", "webp" };
 
         private string DestinationName(string tempFolder, int counter) => $"{ tempFolder }\\{ string.Format("{0:00000}", counter) }.jpg";
 
         private Image GetImageByPath(string inputPath) => Image.FromFile(inputPath);
 
-        private void BrowseDirectory(string directory)
+        private void BrowseDirectory(string directory, string tempFolder)
         {
-            Directory.CreateDirectory(TempFolderPath);
+            Directory.CreateDirectory(tempFolder);
 
             int counter = 0;
             Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
                 .ToList()
                 .ForEach(file =>
                 {
-                    BrowseFile(file, ref counter);
+                    BrowseFile(tempFolder, file, ref counter);
                 });
 
-            ZipFile.CreateFromDirectory(TempFolderPath, $"{ InputFolder}\\{ Prefix } { directory.Split('\\').Last() }.cbz");
-
-            Directory.Delete(TempFolderPath, true);
             Directory.Delete(directory, true);
+
+            ZipFile.CreateFromDirectory(tempFolder, $"{InputFolder}\\{Prefix} {directory.Split('\\').Last()}.cbz");
+
+            Directory.Delete(tempFolder, true);
         }
 
-        private void BrowseFile(string file, ref int counter)
+        private void BrowseFile(string tempFolder, string file, ref int counter)
         {
-            if (ImageExtensions.Contains(file.Split('.').Last()))
+            string extensionFile = file.Split('.').Last();
+            if (ImageExtensions.Contains(extensionFile))
             {
-                using (Image image = GetImageByPath(file))
+                Image image = null;
+                if (extensionFile == "webp")
                 {
-                    if (!IsSinglePage)
+                    using (WebP webp = new WebP())
+                    image = webp.Load(file);
+                }
+                else
+                {
+                    image = GetImageByPath(file);
+                }
+
+                if (!IsSinglePage)
+                {
+                    if (image.Width > image.Height)
                     {
-                        if (image.Width > image.Height)
+                        IEnumerable<Image> imgs = SplitDoublePage(image);
+                        foreach (Image splitedImg in imgs)
                         {
-                            IEnumerable<Image> imgs = SplitDoublePage(image);
-                            foreach (Image splitedImg in imgs)
-                            {
-                                SaveSinglePage(splitedImg, DestinationName(TempFolderPath, counter));
-                                counter++;
-                            }
-                        }
-                        else
-                        {
-                            SaveSinglePage(image, DestinationName(TempFolderPath, counter));
+                            SaveSinglePage(splitedImg, DestinationName(tempFolder, counter));
                             counter++;
                         }
                     }
                     else
                     {
-                        SaveSinglePage(image, DestinationName(TempFolderPath, counter));
+                        SaveSinglePage(image, DestinationName(tempFolder, counter));
                         counter++;
                     }
                 }
+                else
+                {
+                    SaveSinglePage(image, DestinationName(tempFolder, counter));
+                    counter++;
+                }
+                image.Dispose();
             }
         }
 
@@ -131,7 +137,7 @@ namespace app.Services
                 if (DoCompress)
                 {
                     EncoderParameters myEncoderParameters = new EncoderParameters(1);
-                    myEncoderParameters.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 50L);
+                    myEncoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 50L);
 
                     image.Save(ms, GetEncoder(ImageFormat.Jpeg), myEncoderParameters);
                 }

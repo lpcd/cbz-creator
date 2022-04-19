@@ -44,19 +44,19 @@
             <!--OUTPUT PATH-->
             <TextBox Style="{StaticResource placeHolder}"
                      x:Name="mangaNameTextBox"
-                     Tag="Manga name (custom prefix)"
+                     Tag="Manga name (default folder name)"
                      Margin="0 5 0 0"
                      TextWrapping="Wrap" VerticalAlignment="Top"
                      HorizontalContentAlignment="Stretch"
                      Height="20"/>
 
-            <!--Suffixe file--><!--
+            <!--Suffixe file-->
             <StackPanel Orientation="Horizontal" Margin="0 5" Height="20">
                 <TextBlock Text="Suffixe file" Margin="0 0 8 1" VerticalAlignment="Center" FontWeight="DemiBold" />
                 <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="None" IsChecked="True"></RadioButton>
                 <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="Vol." x:Name="IsVolume"></RadioButton>
                 <RadioButton Margin="0 0 5 0" VerticalContentAlignment="Center" Content="Ch." x:Name="IsChapter"></RadioButton>
-            </StackPanel>-->
+            </StackPanel>
 
             <!--PAGE TYPE-->
             <StackPanel Orientation="Horizontal" Height="20">
@@ -115,7 +115,7 @@
 
         <!--SPINNER-->
         <StackPanel x:Name="stackPanelSpinner" Visibility="Hidden">
-            <Image Margin="0 10 0 0" 
+            <Image Margin="0 -130 0 0" 
                    gif:ImageBehavior.AnimatedSource="Assets\tweaking-robot.gif"
                    HorizontalAlignment="Center" 
                    Height="250" 
